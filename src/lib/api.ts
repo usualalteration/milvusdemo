@@ -38,12 +38,6 @@ export const api = {
   fetchDocuments: () =>
     request<import("./types").DocumentsResponse>("/v1/documents"),
 
-  addDocument: (payload: { title: string; category: string; content: string }) =>
-    request<import("./types").AddDocumentResponse>("/v1/documents", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
-
   deleteDocument: (docId: string) =>
     request<import("./types").DeleteDocumentResponse>(
       `/v1/documents/${encodeURIComponent(docId)}`,

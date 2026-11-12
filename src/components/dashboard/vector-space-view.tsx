@@ -83,7 +83,7 @@ export function VectorSpaceView({
             <EmptyState
               icon={Orbit}
               title="No vectors to plot yet"
-              description="Add documents in the Collection view — their embeddings will appear here as a 2D PCA projection."
+              description="The indexed documents appear here as a 2D PCA projection of their embeddings."
             />
           )}
           {points.length > 0 && (

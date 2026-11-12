@@ -21,14 +21,6 @@ export interface DocumentsResponse {
   error?: string;
 }
 
-export interface AddDocumentResponse {
-  ok: boolean;
-  document: DocumentRecord;
-  embed_ms?: number;
-  embedding_model?: string;
-  error?: string;
-}
-
 export interface DeleteDocumentResponse {
   ok: boolean;
   deleted?: string;

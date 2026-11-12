@@ -1,10 +1,9 @@
-/** Document Collection Manager — searchable, filterable table + add/delete. */
+/** Document Collection Manager — searchable, filterable table + delete. */
 
 import * as React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
-  Plus,
   Trash2,
   Layers,
   SearchX,
@@ -46,22 +45,6 @@ export function DocumentsManager({
   const queryClient = useQueryClient();
   const [filter, setFilter] = React.useState("");
   const [categoryFilter, setCategoryFilter] = React.useState("all");
-  const [addOpen, setAddOpen] = React.useState(false);
-
-  const addMutation = useMutation({
-    mutationFn: api.addDocument,
-    onSuccess: (data) => {
-      toast.success("Document indexed", {
-        description: `“${data.document.title}” embedded into ${data.document.dim}d and stored in Milvus.`,
-      });
-      setAddOpen(false);
-      queryClient.invalidateQueries({ queryKey: ["documents"] });
-      queryClient.invalidateQueries({ queryKey: ["vector-space"] });
-      queryClient.invalidateQueries({ queryKey: ["stats"] });
-    },
-    onError: (error: Error) =>
-      toast.error("Could not add document", { description: error.message }),
-  });
 
   const deleteMutation = useMutation({
     mutationFn: api.deleteDocument,
@@ -142,13 +125,6 @@ export function DocumentsManager({
               {formatNumber(filtered.length)} of {formatNumber(documents.length)} shown
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setAddOpen(true)}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-violet-500 px-4 py-2 text-sm font-semibold text-[#05070d] shadow-[0_0_20px_rgba(0,217,255,0.3)] transition-all hover:brightness-110"
-          >
-            <Plus className="h-4 w-4" /> Add document
-          </button>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-3">
@@ -244,99 +220,6 @@ export function DocumentsManager({
           </div>
         )}
       </GlassCard>
-
-      {/* ---- add document panel ---- */}
-      {addOpen && (
-        <GlassCard edgeGlow className="vx-rise p-5 sm:p-6">
-          <h3 className="font-display text-lg font-semibold text-slate-100">
-            Add a document to the vector index
-          </h3>
-          <p className="mt-1 text-[12px] text-slate-500">
-            The backend embeds your text with the same 512-dimensional model, then inserts
-            it into the Milvus collection — instantly searchable.
-          </p>
-          <form
-            className="mt-4 grid gap-4"
-            onSubmit={(event) => {
-              event.preventDefault();
-              const form = new FormData(event.currentTarget);
-              addMutation.mutate({
-                title: String(form.get("title") ?? "").trim(),
-                category: String(form.get("category") ?? "").trim(),
-                content: String(form.get("content") ?? "").trim(),
-              });
-            }}
-          >
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <label htmlFor="new-doc-title" className="text-[11px] uppercase tracking-[0.14em] text-slate-400">
-                  Title
-                </label>
-                <input
-                  id="new-doc-title"
-                  name="title"
-                  type="text"
-                  required
-                  maxLength={200}
-                  className="neon-input h-10 w-full rounded-xl px-3 text-sm"
-                  placeholder="e.g. Quantum Cryptography"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label htmlFor="new-doc-category" className="text-[11px] uppercase tracking-[0.14em] text-slate-400">
-                  Category
-                </label>
-                <input
-                  id="new-doc-category"
-                  name="category"
-                  type="text"
-                  required
-                  list="known-categories"
-                  maxLength={40}
-                  defaultValue="Technology"
-                  className="neon-input h-10 w-full rounded-xl px-3 text-sm"
-                  placeholder="Technology"
-                />
-                <datalist id="known-categories">
-                  {KNOWN_CATEGORIES.map((category) => (
-                    <option key={category} value={category} />
-                  ))}
-                </datalist>
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <label htmlFor="new-doc-content" className="text-[11px] uppercase tracking-[0.14em] text-slate-400">
-                Content
-              </label>
-              <textarea
-                id="new-doc-content"
-                name="content"
-                required
-                maxLength={4000}
-                rows={4}
-                className="neon-input w-full rounded-xl px-3 py-2.5 text-sm"
-                placeholder="Two or three sentences describing the document…"
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setAddOpen(false)}
-                className="rounded-xl border border-white/15 px-4 py-2 text-sm text-slate-300 transition-colors hover:border-white/30"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={addMutation.isPending}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-violet-500 px-5 py-2 text-sm font-semibold text-[#05070d] shadow-[0_0_20px_rgba(0,217,255,0.3)] transition-all hover:brightness-110 disabled:opacity-50"
-              >
-                {addMutation.isPending ? "Embedding…" : "Embed & index"}
-              </button>
-            </div>
-          </form>
-        </GlassCard>
-      )}
     </div>
   );
 }
